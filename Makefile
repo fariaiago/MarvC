@@ -35,6 +35,7 @@ setup: clone
 	@ rm -r $(TMPDIR)
 
 clone:
+	@ mkdir -p $(TMPDIR)
 	@ if [ ! -d $(TMPDIR)/$(CONCORDDIR) ]; then\
 	(cd $(TMPDIR) && git clone https://github.com/Cogmasters/concord.git)\
 	fi
