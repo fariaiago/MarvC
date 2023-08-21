@@ -52,6 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Project specific ignores
+.vscode
 include/*
 !.gitkeep
 MarvC

@@ -1,46 +1,33 @@
+#include "commands.h"
 #include <concord/discord.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 
-#define GUILD_ID 1
-
-void setup_commands(struct discord *client, const struct discord_ready *event)
-{
-	struct discord_create_guild_application_command command = {
-		.name = "ping",
-		.description = "Ping pong command"
-	};
-	discord_create_guild_application_command(client, event->application->id,
-			GUILD_ID, &command, NULL);
-}
-
-void on_interaction(struct discord *client, const struct discord_interaction *event)
-{
-	if(event->type != DISCORD_INTERACTION_APPLICATION_COMMAND)
-		return;
-	
-	if(strcmp(event->data->name, "ping") == 0)
-	{
-		struct discord_interaction_response response = {
-			.type = DISCORD_INTERACTION_CHANNEL_MESSAGE_WITH_SOURCE,
-			.data = &(struct discord_interaction_callback_data){
-				.content = "pong"
-			}
-		};
-		discord_create_interaction_response(client, event->id, event->token,
-				&response, NULL);
-	}
-}
+#define CMD_PREFIX "->"
 
 int main(int argc, char *argv[])
 {
 	if(argc < 2)
+	{
 		return -1;
+	}
+	srand(time(NULL));
+	ccord_global_init();
+	
 	struct discord *client = discord_init(argv[1]);
-	discord_add_intents(client, DISCORD_GATEWAY_MESSAGE_CONTENT);
-	discord_set_on_ready(client, &setup_commands);
-	discord_set_on_interaction_create(client, &on_interaction);
+	
+	discord_add_intents(client, DISCORD_GATEWAY_MESSAGE_CONTENT | DISCORD_GATEWAY_GUILD_MEMBERS);
+	discord_set_prefix(client, CMD_PREFIX);
+
+	discord_set_on_command(client, PING_CMD_NAME, &on_ping);
+	discord_set_on_command(client, PICK_CMD_NAME, &on_pick);
+	discord_set_on_command(client, MUTE_CMD_NAME, &on_mute);
+	discord_set_on_command(client, UNMUTE_CMD_NAME, &on_unmute);
+	
 	discord_run(client);
+	
 	discord_cleanup(client);
+	ccord_global_cleanup();
+
 	return 0;
 }
